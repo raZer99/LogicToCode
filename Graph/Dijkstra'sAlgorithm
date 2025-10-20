@@ -1,0 +1,276 @@
+🧩 OVERVIEW
+
+This method computes the shortest distance from src to all vertices in a weighted, undirected graph using Dijkstra’s Algorithm.
+
+We’ll go section by section 👇
+
+1️⃣ Method Signature
+public int[] dijkstra(int V, int[][] edges, int src)
+
+Meaning:
+
+public → visible to other classes (like public in C++)
+
+int[] → function returns an array of integers (like vector<int> in C++)
+
+int V → number of vertices
+
+int[][] edges → 2D array representing edges (like vector<vector<int>> edges in C++)
+
+int src → source vertex
+
+2️⃣ Creating the Adjacency List
+List<List<int[]>> adj = new ArrayList<>();
+for(int i = 0; i < V; i++) {
+    adj.add(new ArrayList<>());
+}
+
+✅ Java Concept:
+
+List<List<int[]>> = a list of lists, where each inner list stores int[] pairs → [neighbor, weight]
+
+ArrayList<>() = like vector<> in C++ (dynamic array)
+
+.add() = adds an element to the list
+
+.get(i) = retrieves the element at index i (instead of [i] like in C++)
+
+🔁 Equivalent in C++:
+vector<vector<pair<int, int>>> adj(V);
+
+🧠 Why int[] and not Pair?
+
+Java has no built-in pair<int,int> type like C++, so we use a 2-element integer array int[]{v, w} to store (neighbor, weight).
+
+3️⃣ Filling the Adjacency List
+for (int[] e : edges) {
+    int u = e[0];
+    int v = e[1];
+    int w = e[2];
+
+    adj.get(u).add(new int[]{v, w});
+    adj.get(v).add(new int[]{u, w});
+}
+
+Explanation:
+
+for (int[] e : edges) → enhanced for loop (like for(auto e : edges) in C++)
+
+e is each edge = [u, v, w]
+
+.get(u) = returns list of neighbors of node u
+
+.add(new int[]{v, w}) = adds neighbor and weight as array {v,w}
+
+Why both directions?
+
+Because the graph is undirected — you must add both (u,v) and (v,u).
+
+4️⃣ Priority Queue (Min Heap)
+PriorityQueue<int[]> pq = new PriorityQueue<>((a,b) -> a[0]-b[0]);
+
+✅ Java Concept:
+
+PriorityQueue = like priority_queue in C++
+
+Default is max-heap, but (a,b) -> a[0]-b[0] creates min-heap by comparing first element
+
+Each element = int[]{distance, node}
+
+So:
+
+a[0] = distance
+
+a[1] = node
+
+C++ Equivalent:
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+
+5️⃣ Distance Array Initialization
+int[] res = new int[V];
+Arrays.fill(res, Integer.MAX_VALUE);
+
+Meaning:
+
+int[] res = array to store shortest distances
+
+Arrays.fill() = fill all elements with infinity (like fill(dist.begin(), dist.end(), INT_MAX) in C++)
+
+Then:
+
+res[src] = 0;
+pq.add(new int[]{0, src});
+
+
+Push source node with distance 0.
+
+6️⃣ Dijkstra’s Core Loop
+while(!pq.isEmpty()) {
+    int[] p = pq.poll();
+    int node = p[1];
+    int d = p[0];
+
+Explanation:
+
+.isEmpty() = check if queue is empty
+
+.poll() = removes and returns the smallest element (like .top() + .pop() in C++)
+
+So p = [distance, node]
+
+7️⃣ Exploring Neighbors
+for (int[] e : adj.get(node)) {
+    int adjNode = e[0];
+    int wt = e[1];
+
+    if (d + wt < res[adjNode]) {
+        res[adjNode] = d + wt;
+        pq.add(new int[]{d + wt, adjNode});
+    }
+}
+
+Meaning:
+
+adj.get(node) = list of [neighbor, weight] arrays
+
+if (d + wt < res[adjNode]) → relax edge condition
+
+update res and push new distance into priority queue
+
+C++ Equivalent:
+for (auto [adjNode, wt] : adj[node]) {
+    if (d + wt < dist[adjNode]) {
+        dist[adjNode] = d + wt;
+        pq.push({d + wt, adjNode});
+    }
+}
+
+8️⃣ Return the Result
+return res;
+
+
+Gives shortest distances from src to all vertices.
+
+✅ Summary Table (Java vs C++)
+Concept	Java	C++
+Dynamic Array	ArrayList<>	vector<>
+Pair	int[]{a,b}	pair<int,int>
+Get element	.get(i)	[i]
+Add element	.add(x)	.push_back(x)
+Priority Queue	PriorityQueue<>	priority_queue<>
+Pop min element	.poll()	.top() + .pop()
+Infinity	Integer.MAX_VALUE	INT_MAX
+
+Would you like me to show a fully formatted + commented version of this Dijkstra code (Java) that reads like a textbook version for your notes?
+
+You said:
+yes
+ChatGPT said:
+
+Perfect 👍
+Here’s a clean, well-commented, and readable version of your Dijkstra’s Algorithm in Java, written as if it were a textbook or interview reference — with all concepts clearly explained inline 👇
+
+import java.util.*; 
+
+class Solution {
+
+    // Function to perform Dijkstra's algorithm
+    public int[] dijkstra(int V, int[][] edges, int src) {
+
+        // ----------------------------------------------------------
+        // Step 1: Create an adjacency list representation of the graph
+        // ----------------------------------------------------------
+        // Each node (0 to V-1) will have a list of [neighbor, weight]
+        // So adj.get(u) gives a list of int[]{v, w} pairs.
+        List<List<int[]>> adj = new ArrayList<>();
+        for (int i = 0; i < V; i++) {
+            adj.add(new ArrayList<>());  // initially empty list for each vertex
+        }
+
+        // ----------------------------------------------------------
+        // Step 2: Fill adjacency list from the edge list
+        // ----------------------------------------------------------
+        // Given edges[i] = [u, v, w], meaning there is an edge
+        // between u and v with weight w (undirected)
+        for (int[] e : edges) {
+            int u = e[0];
+            int v = e[1];
+            int w = e[2];
+
+            adj.get(u).add(new int[]{v, w}); // u -> v
+            adj.get(v).add(new int[]{u, w}); // v -> u
+        }
+
+        // ----------------------------------------------------------
+        // Step 3: Initialize a priority queue (min-heap)
+        // ----------------------------------------------------------
+        // The queue stores elements as [distance, node]
+        // Comparator ensures nodes with smaller distance come first
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+
+        // ----------------------------------------------------------
+        // Step 4: Distance array initialization
+        // ----------------------------------------------------------
+        int[] dist = new int[V];
+        Arrays.fill(dist, Integer.MAX_VALUE); // initially set all to infinity
+        dist[src] = 0;                        // distance from src to itself is 0
+
+        // Push the source node into the queue with distance 0
+        pq.add(new int[]{0, src});
+
+        // ----------------------------------------------------------
+        // Step 5: Dijkstra’s main loop
+        // ----------------------------------------------------------
+        while (!pq.isEmpty()) {
+            int[] p = pq.poll();  // pop the smallest distance pair
+            int d = p[0];         // current distance
+            int node = p[1];      // current node
+
+            // Explore all adjacent nodes of the current node
+            for (int[] edge : adj.get(node)) {
+                int adjNode = edge[0];
+                int wt = edge[1];
+
+                // Relaxation step
+                if (d + wt < dist[adjNode]) {
+                    dist[adjNode] = d + wt; // update distance
+                    pq.add(new int[]{dist[adjNode], adjNode}); // push new pair
+                }
+            }
+        }
+
+        // ----------------------------------------------------------
+        // Step 6: Return the computed shortest distances
+        // ----------------------------------------------------------
+        return dist;
+    }
+}
+
+🧠 Conceptual Recap (with C++ parallels)
+Concept	Java Equivalent	C++ Equivalent	Explanation
+Graph Representation	List<List<int[]>>	vector<vector<pair<int,int>>>	Each vertex stores list of (neighbor, weight)
+Adding Edges	.add(new int[]{v, w})	.push_back({v, w})	Adds neighbor and edge weight
+Accessing Neighbors	.get(u)	[u]	Get list of adjacent nodes
+Min Heap	PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->a[0]-b[0])	priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;	Stores (distance, node) pairs
+Pop Min	.poll()	.top() + .pop()	Removes smallest distance node
+Infinity	Integer.MAX_VALUE	INT_MAX	Used to initialize distance array
+Loop over adjacency	for(int[] edge : adj.get(node))	for(auto [v,w] : adj[node])	Iterates over neighbors
+
+✅ Output Example
+
+For:
+
+V = 3
+edges = [[0,1,1],[1,2,3],[0,2,6]]
+src = 2
+
+
+Result:
+[4, 3, 0]
+Explanation:
+
+2 → 0 = 4 (2→1→0)
+
+2 → 1 = 3
+
+2 → 2 = 0
