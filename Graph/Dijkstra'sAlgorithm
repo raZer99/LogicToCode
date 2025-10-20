@@ -161,14 +161,7 @@ Priority Queue	PriorityQueue<>	priority_queue<>
 Pop min element	.poll()	.top() + .pop()
 Infinity	Integer.MAX_VALUE	INT_MAX
 
-Would you like me to show a fully formatted + commented version of this Dijkstra code (Java) that reads like a textbook version for your notes?
-
-You said:
-yes
-ChatGPT said:
-
-Perfect 👍
-Here’s a clean, well-commented, and readable version of your Dijkstra’s Algorithm in Java, written as if it were a textbook or interview reference — with all concepts clearly explained inline 👇
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ C O D E +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import java.util.*; 
 
