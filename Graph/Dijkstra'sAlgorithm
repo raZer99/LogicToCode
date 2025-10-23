@@ -267,3 +267,65 @@ Explanation:
 2 → 1 = 3
 
 2 → 2 = 0
+
+
+############ TreeSet/Dijkstra'sAlgorithm.java ############
+
+import java.util.*;
+
+class Solution {
+    public int[] dijkstra(int V, int[][] edges, int src) {
+        // adjacency list where each vertex stores (neighbor, weight)
+        List<List<int[]>> adj = new ArrayList<>();
+        for (int i = 0; i < V; i++) adj.add(new ArrayList<>());
+
+        // build graph (undirected)
+        for (int[] e : edges) {
+            int u = e[0], v = e[1], w = e[2];
+            adj.get(u).add(new int[]{v, w});
+            adj.get(v).add(new int[]{u, w});
+        }
+
+        // distance array initialized with infinity
+        int[] dist = new int[V];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[src] = 0;
+
+        // TreeSet acts like an ordered set sorted by (distance, node)
+        TreeSet<int[]> set = new TreeSet<>((a, b) -> {
+            // compare first by distance
+            if (a[0] != b[0]) return Integer.compare(a[0], b[0]);
+            // if distances are equal, compare by node id to keep order unique
+            return Integer.compare(a[1], b[1]);
+        });
+
+        // start with source node having distance 0
+        set.add(new int[]{0, src});
+
+        // process nodes in order of increasing distance
+        while (!set.isEmpty()) {
+            // extract node with smallest distance
+            int[] top = set.pollFirst();
+            int d = top[0], node = top[1];
+
+            // traverse all adjacent nodes
+            for (int[] edge : adj.get(node)) {
+                int adjNode = edge[0], wt = edge[1];
+
+                // relaxation: check if new distance is shorter
+                if (d + wt < dist[adjNode]) {
+                    // if already in set with old distance, remove it
+                    if (dist[adjNode] != Integer.MAX_VALUE)
+                        set.remove(new int[]{dist[adjNode], adjNode});
+
+                    // update distance and reinsert into set
+                    dist[adjNode] = d + wt;
+                    set.add(new int[]{dist[adjNode], adjNode});
+                }
+            }
+        }
+
+        // return final shortest distances
+        return dist;
+    }
+}
